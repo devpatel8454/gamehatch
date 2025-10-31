@@ -1,0 +1,383 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaGamepad, FaArrowRight, FaStar, FaRegClock, FaTag, FaChevronRight, FaPlay } from 'react-icons/fa';
+import GameCard from '../Components/GameCard/GameCard';
+import NewsCard from '../Components/NewsCard/NewsCard';
+import { motion } from 'framer-motion';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import Footer from '../Components/Footer/Footer';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+
+// Mock data - in a real app, this would come from an API
+// Image paths in public directory
+const game1 = '/images/game1.jpg';
+const game2 = '/images/game2.jpg';
+const game3 = '/images/game3.jpg';
+const game4 = '/images/game4.jpg';
+
+const heroSlides = [
+  {
+    id: 1,
+    title: 'Cyberpunk 2077: Phantom Liberty',
+    description: 'The next chapter in the Cyberpunk saga. Experience an immersive open-world adventure.',
+    image: game1,
+    buttonText: 'Pre-order Now',
+    buttonLink: '/game/cyberpunk-2077',
+    isNew: true
+  },
+  {
+    id: 2,
+    title: 'Elden Ring: Shadow of the Erdtree',
+    description: 'The highly anticipated expansion to the 2023 Game of the Year.',
+    image: game2,
+    buttonText: 'Learn More',
+    buttonLink: '/game/elden-ring',
+    isNew: false
+  },
+  {
+    id: 3,
+    title: 'God of War: Ragnarök',
+    description: 'Join Kratos and Atreus on a mythic journey through the Nine Realms.',
+    image: game3,
+    buttonText: 'Buy Now',
+    buttonLink: '/game/god-of-war-ragnarok',
+    isNew: false
+  }
+];
+
+const featuredGames = [
+  {
+    id: 1,
+    title: 'Cyberpunk 2077',
+    genre: 'RPG',
+    price: 59.99,
+    discount: 30,
+    rating: 4.5,
+    image: game1,
+    platforms: ['pc', 'ps5', 'xbox'],
+    releaseDate: '2023-09-26',
+    isNew: true
+  },
+  {
+    id: 2,
+    title: 'Elden Ring',
+    genre: 'Action RPG',
+    price: 59.99,
+    rating: 4.8,
+    image: game2,
+    platforms: ['pc', 'ps4', 'ps5', 'xbox'],
+    releaseDate: '2022-02-25',
+    isNew: false
+  },
+  {
+    id: 3,
+    title: 'God of War Ragnarök',
+    genre: 'Action-Adventure',
+    price: 69.99,
+    rating: 4.9,
+    image: game3,
+    platforms: ['ps4', 'ps5'],
+    releaseDate: '2022-11-09',
+    isNew: false
+  },
+  {
+    id: 4,
+    title: 'Horizon Forbidden West',
+    genre: 'Action RPG',
+    price: 59.99,
+    discount: 25,
+    rating: 4.7,
+    image: game4,
+    platforms: ['ps4', 'ps5'],
+    releaseDate: '2022-02-18',
+    isNew: false
+  }
+];
+
+const gameCategories = [
+  { id: 1, name: 'Action', count: 124, icon: '🎮' },
+  { id: 2, name: 'Adventure', count: 89, icon: '🗺️' },
+  { id: 3, name: 'RPG', count: 76, icon: '⚔️' },
+  { id: 4, name: 'Strategy', count: 52, icon: '♟️' },
+  { id: 5, name: 'Sports', count: 45, icon: '⚽' },
+  { id: 6, name: 'Racing', count: 38, icon: '🏎️' }
+];
+
+const Home = () => {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [trendingGames, setTrendingGames] = useState([]);
+  const [upcomingGames, setUpcomingGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate API call
+    const fetchTrendingGames = async () => {
+      try {
+        setLoading(true);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setTrendingGames(featuredGames);
+        setUpcomingGames([...featuredGames].reverse());
+      } catch (error) {
+        console.error('Error fetching games:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendingGames();
+
+    // Cleanup function
+    return () => {
+      // Clear any intervals or subscriptions here
+    };
+  }, []);
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const daysUntilRelease = (dateString) => {
+    const today = new Date();
+    const releaseDate = new Date(dateString);
+    const diffTime = releaseDate - today;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-900">
+      <main className="flex-grow">
+        {/* Hero Slider */}
+        <section className="relative h-[80vh] overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <Swiper
+              spaceBetween={0}
+              centeredSlides={true}
+              autoplay={{
+                delay: 5000,
+                disableOnInteraction: false,
+              }}
+              pagination={{
+                clickable: true,
+              }}
+              navigation={true}
+              modules={[Autoplay, Pagination, Navigation]}
+              className="h-full w-full"
+              onSlideChange={(swiper) => setActiveSlide(swiper.activeIndex)}
+            >
+              {heroSlides.map((slide) => (
+                <SwiperSlide key={slide.id}>
+                  <div 
+                    className="h-full w-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${slide.image})` }}
+                  >
+                    <div className="absolute inset-0 bg-black bg-opacity-60">
+                      <div className="container mx-auto h-full flex items-center px-4">
+                        <motion.div 
+                          className="max-w-2xl"
+                          initial={{ opacity: 0, x: -50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {slide.isNew && (
+                            <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full mb-4 inline-block">
+                              NEW RELEASE
+                            </span>
+                          )}
+                          <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+                            {slide.title}
+                          </h1>
+                          <p className="text-xl text-gray-300 mb-8">{slide.description}</p>
+                          <div className="flex flex-wrap gap-4">
+                            <Link
+                              to={slide.buttonLink}
+                              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 inline-flex items-center"
+                            >
+                              {slide.buttonText}
+                              <FaChevronRight className="ml-2" />
+                            </Link>
+                            <button className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white font-bold py-3 px-6 rounded-full text-lg transition-all flex items-center">
+                              <FaPlay className="mr-2" /> Watch Trailer
+                            </button>
+                          </div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+          
+          {/* Slide Indicators */}
+          <div className="absolute bottom-8 left-0 right-0 z-10">
+            <div className="flex justify-center space-x-2">
+              {heroSlides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all ${activeSlide === index ? 'bg-blue-500 w-8' : 'bg-white bg-opacity-30'}`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Games */}
+        <section className="py-16 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold">Featured Games</h2>
+              <Link to="/games" className="text-blue-400 hover:text-blue-300 flex items-center group">
+                View All <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredGames.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Game Categories */}
+        <section className="py-16 bg-gray-800">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8">Browse by Category</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+              {gameCategories.map((category) => (
+                <Link
+                  key={category.id}
+                  to={`/category/${category.name.toLowerCase()}`}
+                  className="bg-gray-700 hover:bg-gray-600 rounded-lg p-6 text-center transition-colors group"
+                >
+                  <span className="text-3xl mb-2 inline-block">{category.icon}</span>
+                  <h3 className="font-bold text-lg">{category.name}</h3>
+                  <p className="text-gray-400 text-sm">{category.count} Games</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Upcoming Releases */}
+        <section className="py-16 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold">Upcoming Releases</h2>
+              <Link to="/upcoming" className="text-blue-400 hover:text-blue-300 flex items-center group">
+                View All <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingGames.slice(0, 3).map((game) => (
+                <div key={game.id} className="bg-gray-800 rounded-xl overflow-hidden">
+                  <div className="relative h-48">
+                    <img 
+                      src={game.image} 
+                      alt={game.title} 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <h3 className="text-xl font-bold">{game.title}</h3>
+                          <p className="text-gray-300">{game.genre}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-yellow-400 flex items-center justify-end">
+                            <FaStar className="mr-1" />
+                            <span>{game.rating}/5.0</span>
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            {daysUntilRelease(game.releaseDate)} days to go
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        {game.discount ? (
+                          <div className="flex items-center">
+                            <span className="text-gray-400 line-through mr-2">${game.price}</span>
+                            <span className="text-white font-bold">
+                              ${(game.price * (100 - game.discount) / 100).toFixed(2)}
+                            </span>
+                            <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded ml-2">
+                              -{game.discount}%
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-white font-bold">${game.price}</span>
+                        )}
+                      </div>
+                      <Link 
+                        to={`/game/${game.id}`}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-sm transition-all"
+                      >
+                        Pre-order Now
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-r from-blue-900 to-purple-900">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready to Start Your Gaming Journey?</h2>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              Join thousands of gamers and get access to exclusive deals, early releases, and a community of like-minded players.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link 
+                to="/signup" 
+                className="bg-white text-blue-900 hover:bg-gray-100 font-bold py-4 px-10 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg"
+              >
+                Create Free Account
+              </Link>
+              <Link 
+                to="/games" 
+                className="bg-transparent hover:bg-white/10 text-white font-bold py-4 px-10 border-2 border-white rounded-full text-lg transition-all shadow-lg"
+              >
+                Browse Games
+              </Link>
+            </div>
+            <div className="mt-8 flex flex-wrap justify-center gap-6 text-gray-300 text-sm">
+              <div className="flex items-center">
+                <div className="bg-green-500 w-3 h-3 rounded-full mr-2"></div>
+                <span>1000+ Games</span>
+              </div>
+              <div className="flex items-center">
+                <div className="bg-blue-500 w-3 h-3 rounded-full mr-2"></div>
+                <span>50+ Publishers</span>
+              </div>
+              <div className="flex items-center">
+                <div className="bg-purple-500 w-3 h-3 rounded-full mr-2"></div>
+                <span>24/7 Support</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      
+      {/* Footer */}
+      <Footer className="mt-auto" />
+    </div>
+  );
+};
+
+export default Home;
