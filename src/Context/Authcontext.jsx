@@ -124,6 +124,20 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", jwtToken);
       localStorage.setItem("user", JSON.stringify(userData));
 
+      // Create session cookie for tracking active users
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const sessionData = {
+        sessionId: sessionId,
+        userId: userData.id || userData.userId || userData.UserId || userData.ID,
+        username: userData.username || userData.Username || userData.email,
+        loginTime: new Date().toISOString(),
+        expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+      };
+      
+      // Set session cookie (expires in 24 hours)
+      document.cookie = `userSession=${JSON.stringify(sessionData)}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
+      localStorage.setItem('userSession', JSON.stringify(sessionData));
+
       // Update context state
       setToken(jwtToken);
       setUser(userData);
@@ -238,6 +252,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
+      localStorage.removeItem("userSession");
+      
+      // Clear session cookie
+      document.cookie = 'userSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      
       setToken("");
       setUser(null);
       setIsAuthenticated(false);
@@ -260,8 +279,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('userSession');
       // Also remove any admin token if present
       localStorage.removeItem('adminToken');
+      
+      // Clear session cookie
+      document.cookie = 'userSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     } catch (e) {
       if (import.meta.env.DEV) {
         console.warn('AuthContext - Error clearing localStorage:', e);

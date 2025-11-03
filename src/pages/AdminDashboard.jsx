@@ -4,6 +4,7 @@ import { FaUsers, FaGamepad, FaChartLine, FaSignOutAlt, FaCog, FaUserCog } from 
 import { motion } from 'framer-motion';
 import AdminGameManagement from '../Components/Admin/AdminGameManagement';
 import AdminUserManagement from '../Components/Admin/AdminUserManagement';
+import { getActiveSessionsCount, cleanupExpiredSessions } from '../utils/sessionUtils';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -87,35 +88,37 @@ const AdminDashboard = () => {
         }
       };
       
-      // Fetch active sessions count (users currently logged in)
-      const fetchActiveSessions = async () => {
+      // Fetch active sessions count from cookies and localStorage
+      const fetchActiveSessions = () => {
         try {
-          console.log('Fetching active sessions count...');
-          // Count users who have tokens in localStorage or are currently active
-          // For now, we'll use the total users count as a base
-          // In a real app, you'd track active sessions in the backend
-          const response = await fetch('https://localhost:7270/api/Auth/all-users', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+          console.log('Counting active sessions from cookies/localStorage...');
           
-          if (response.ok) {
-            const users = await response.json();
-            // Simulate active sessions (in real app, backend would track this)
-            // For demo, show ~60% of users as active
-            const activeSessions = Math.floor(users.length * 0.6);
-            console.log('Active sessions count:', activeSessions);
-            setActiveSessionsCount(activeSessions);
+          // Clean up any expired sessions first
+          const cleanedCount = cleanupExpiredSessions();
+          if (cleanedCount > 0) {
+            console.log(`Cleaned up ${cleanedCount} expired sessions`);
           }
+          
+          // Get count of active, non-expired sessions
+          const activeSessions = getActiveSessionsCount();
+          console.log('Active sessions count:', activeSessions);
+          setActiveSessionsCount(activeSessions);
         } catch (error) {
           console.error('Error in fetchActiveSessions:', error);
+          setActiveSessionsCount(0);
         }
       };
 
       fetchActiveUsers();
       fetchGamesCount();
       fetchActiveSessions();
+      
+      // Set up interval to refresh active sessions count every 30 seconds
+      const sessionInterval = setInterval(() => {
+        fetchActiveSessions();
+      }, 30000); // 30 seconds
+      
+      return () => clearInterval(sessionInterval);
     } else {
       navigate('/admin/login');
     }
