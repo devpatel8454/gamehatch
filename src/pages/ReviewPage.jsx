@@ -52,52 +52,8 @@ const ReviewPage = () => {
     }
   };
 
-  // Safely resolve the reviewer's display name from different API/local shapes
+  // Always return 'Anonymous' for privacy
   const getReviewerName = (review) => {
-    if (!review) return 'Anonymous';
-    
-    // Priority 1: Check reviewerName field (user-entered name from form)
-    const reviewerName = review.reviewerName || review.ReviewerName;
-    if (reviewerName && String(reviewerName).trim() !== '' && String(reviewerName).trim().toLowerCase() !== 'dev') {
-      return reviewerName;
-    }
-    
-    // Priority 2: Check other direct fields
-    const direct = review.userName || review.username || review.UserName || review.Username || 
-                   review.firstName || review.FirstName ||
-                   review.name || review.Name || 
-                   review.fullName || review.FullName || 
-                   review.displayName || review.DisplayName;
-    
-    if (direct && String(direct).trim() !== '' && String(direct).trim().toLowerCase() !== 'dev') {
-      return direct;
-    }
-    
-    // Priority 3: Check nested user object
-    if (review.user) {
-      const nested = review.user.userName || review.user.username || review.user.UserName || review.user.Username ||
-                     review.user.firstName || review.user.FirstName ||
-                     review.user.name || review.user.Name || 
-                     review.user.fullName || review.user.FullName || 
-                     review.user.displayName || review.user.DisplayName;
-      
-      if (nested && String(nested).trim() !== '' && String(nested).trim().toLowerCase() !== 'dev') {
-        return nested;
-      }
-      
-      // Try email from user object
-      const email = review.user.email || review.user.Email;
-      if (email && String(email).includes('@')) {
-        return String(email).split('@')[0];
-      }
-    }
-    
-    // Priority 4: Try email from review object
-    const emailBased = review.email || review.Email;
-    if (emailBased && String(emailBased).includes('@')) {
-      return String(emailBased).split('@')[0];
-    }
-    
     return 'Anonymous';
   };
 

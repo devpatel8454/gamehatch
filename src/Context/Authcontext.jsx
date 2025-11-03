@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
-const getToken = localStorage.getItem("token") ? localStorage.getItem("token") : "";
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -10,8 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
-    if (getToken) {
-      setToken(getToken);
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
       // Load user session from localStorage if exists
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
@@ -27,7 +27,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async ({ endpoint, payload, onSuccess }) => {
     try {
-      console.log('AuthContext - Login attempt:', { endpoint, payload });
+      if (import.meta.env.DEV) {
+        console.log('AuthContext - Login attempt:', { endpoint, payload });
+      }
 
       // Make actual API call to backend
       const response = await fetch(`https://${endpoint}`, {
@@ -39,19 +41,25 @@ export const AuthProvider = ({ children }) => {
       });
 
       const responseText = await response.text();
-      console.log('Raw API Response:', response.status, responseText);
+      if (import.meta.env.DEV) {
+        console.log('Raw API Response:', response.status, responseText);
+      }
 
       // Check if response is actually JSON
       let data;
       try {
         data = JSON.parse(responseText);
       } catch (parseError) {
-        console.error('Failed to parse JSON response:', parseError);
-        console.error('Response text:', responseText.substring(0, 200) + '...');
+        if (import.meta.env.DEV) {
+          console.error('Failed to parse JSON response:', parseError);
+          console.error('Response text:', responseText.substring(0, 200) + '...');
+        }
         throw new Error(`Server returned invalid JSON. Status: ${response.status}. Response: ${responseText.substring(0, 100)}...`);
       }
 
-      console.log('Parsed API Response:', response.status, data);
+      if (import.meta.env.DEV) {
+        console.log('Parsed API Response:', response.status, data);
+      }
 
       if (!response.ok) {
         // Handle API errors
@@ -63,20 +71,26 @@ export const AuthProvider = ({ children }) => {
       // Handle different response formats
       let jwtToken, userData, message;
 
-      console.log('🔍 Raw API response data:', data);
+      if (import.meta.env.DEV) {
+        console.log('🔍 Raw API response data:', data);
+      }
 
       if (data.token && data.user) {
         // Format: { token: "...", user: {...}, message: "..." }
         jwtToken = data.token;
         userData = data.user;
         message = data.message;
-        console.log('✅ Format 1: token + user object');
+        if (import.meta.env.DEV) {
+          console.log('✅ Format 1: token + user object');
+        }
       } else if (data.accessToken && data.user) {
         // Format: { accessToken: "...", user: {...} }
         jwtToken = data.accessToken;
         userData = data.user;
         message = data.message || 'Login successful';
-        console.log('✅ Format 2: accessToken + user object');
+        if (import.meta.env.DEV) {
+          console.log('✅ Format 2: accessToken + user object');
+        }
       } else if (data.token) {
         // Format: { token: "...", userId: 123, username: "..." }
         jwtToken = data.token;
@@ -88,13 +102,19 @@ export const AuthProvider = ({ children }) => {
           lastName: data.lastName || data.LastName,
         };
         message = data.message || 'Login successful';
-        console.log('✅ Format 3: flat token + user fields');
+        if (import.meta.env.DEV) {
+          console.log('✅ Format 3: flat token + user fields');
+        }
       } else {
-        console.error('Unexpected API response format:', data);
+        if (import.meta.env.DEV) {
+          console.error('Unexpected API response format:', data);
+        }
         throw new Error('Invalid response format from server');
       }
       
-      console.log('📦 Extracted userData:', userData);
+      if (import.meta.env.DEV) {
+        console.log('📦 Extracted userData:', userData);
+      }
 
       if (!jwtToken) {
         throw new Error('No token received from server');
@@ -116,14 +136,18 @@ export const AuthProvider = ({ children }) => {
 
       return { data: { success: true, message } };
     } catch (error) {
-      console.error('AuthContext - Login error:', error);
+      if (import.meta.env.DEV) {
+        console.error('AuthContext - Login error:', error);
+      }
       return { error: error };
     }
   };
 
   const signup = async ({ endpoint, payload, onSuccess }) => {
     try {
-      console.log('AuthContext - Signup attempt:', { endpoint, payload });
+      if (import.meta.env.DEV) {
+        console.log('AuthContext - Signup attempt:', { endpoint, payload });
+      }
 
       // Make actual API call to backend
       const response = await fetch(`https://${endpoint}`, {
@@ -135,16 +159,22 @@ export const AuthProvider = ({ children }) => {
       });
 
       const responseText = await response.text();
-      console.log('Raw API Response:', response.status, responseText);
+      if (import.meta.env.DEV) {
+        console.log('Raw API Response:', response.status, responseText);
+      }
 
       // Check if response is actually JSON
       let data;
       try {
         data = JSON.parse(responseText);
-        console.log('Parsed Signup API Response:', response.status, data);
+        if (import.meta.env.DEV) {
+          console.log('Parsed Signup API Response:', response.status, data);
+        }
       } catch (parseError) {
         // If parsing fails, treat as plain text response
-        console.log('Signup API returned plain text, not JSON:', responseText);
+        if (import.meta.env.DEV) {
+          console.log('Signup API returned plain text, not JSON:', responseText);
+        }
         data = { message: responseText };
       }
 
@@ -165,14 +195,18 @@ export const AuthProvider = ({ children }) => {
 
       return { data: { success: true, message } };
     } catch (error) {
-      console.error('AuthContext - Signup error:', error);
+      if (import.meta.env.DEV) {
+        console.error('AuthContext - Signup error:', error);
+      }
       return { error: error };
     }
   };
 
   const logout = async () => {
     try {
-      console.log('AuthContext - Logout');
+      if (import.meta.env.DEV) {
+        console.log('AuthContext - Logout');
+      }
 
       // Get current token for logout API call
       const currentToken = localStorage.getItem("token");
@@ -189,9 +223,13 @@ export const AuthProvider = ({ children }) => {
               token: currentToken
             }),
           });
-          console.log('Logout API call successful');
+          if (import.meta.env.DEV) {
+            console.log('Logout API call successful');
+          }
         } catch (apiError) {
-          console.warn('Logout API call failed, but continuing with local logout:', apiError);
+          if (import.meta.env.DEV) {
+            console.warn('Logout API call failed, but continuing with local logout:', apiError);
+          }
           // Continue with local logout even if API call fails
         }
       }
@@ -206,7 +244,9 @@ export const AuthProvider = ({ children }) => {
 
       return { data: { success: true } };
     } catch (error) {
-      console.error('AuthContext - Logout error:', error);
+      if (import.meta.env.DEV) {
+        console.error('AuthContext - Logout error:', error);
+      }
       return { error: error };
     }
   };
@@ -214,14 +254,18 @@ export const AuthProvider = ({ children }) => {
   // Purge any old/invalid tokens and user data locally without calling the backend
   const purgeAuth = () => {
     try {
-      console.log('AuthContext - Purge local auth storage');
+      if (import.meta.env.DEV) {
+        console.log('AuthContext - Purge local auth storage');
+      }
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       // Also remove any admin token if present
       localStorage.removeItem('adminToken');
     } catch (e) {
-      console.warn('AuthContext - Error clearing localStorage:', e);
+      if (import.meta.env.DEV) {
+        console.warn('AuthContext - Error clearing localStorage:', e);
+      }
     }
     setToken("");
     setUser(null);

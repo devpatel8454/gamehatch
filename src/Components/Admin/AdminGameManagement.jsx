@@ -38,6 +38,8 @@ const AdminGameManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingGame, setEditingGame] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const gamesPerPage = 5;
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -672,7 +674,9 @@ const AdminGameManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-gray-800 divide-y divide-gray-700">
-              {games.map((game, index) => (
+              {games
+                .slice((currentPage - 1) * gamesPerPage, currentPage * gamesPerPage)
+                .map((game, index) => (
                 <motion.tr
                   key={game.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -733,6 +737,48 @@ const AdminGameManagement = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {games.length > gamesPerPage && (
+          <div className="px-6 py-4 bg-gray-900 border-t border-gray-700 flex items-center justify-between">
+            <div className="text-sm text-gray-400">
+              Showing {((currentPage - 1) * gamesPerPage) + 1} to {Math.min(currentPage * gamesPerPage, games.length)} of {games.length} games
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: Math.ceil(games.length / gamesPerPage) }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-4 py-2 rounded-lg transition-colors ${
+                      currentPage === page
+                        ? 'bg-red-600 text-white'
+                        : 'bg-gray-700 hover:bg-gray-600 text-white'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(games.length / gamesPerPage)))}
+                disabled={currentPage === Math.ceil(games.length / gamesPerPage)}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

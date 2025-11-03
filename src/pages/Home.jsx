@@ -67,7 +67,7 @@ const featuredGames = [
     id: 1,
     title: 'Cyberpunk 2077',
     genre: 'RPG',
-    price: 49.99,
+    price: 3499,
     discount: 30,
     rating: 4.5,
     platforms: ['PC', 'PS5', 'Xbox'],
@@ -77,7 +77,7 @@ const featuredGames = [
     id: 2,
     title: 'Elden Ring',
     genre: 'Action RPG',
-    price: 59.99,
+    price: 4499,
     rating: 4.8,
     platforms: ['PC', 'PS5', 'Xbox'],
     image: game2
@@ -86,7 +86,7 @@ const featuredGames = [
     id: 3,
     title: 'God of War: Ragnarök',
     genre: 'Action-Adventure',
-    price: 69.99,
+    price: 4999,
     rating: 4.9,
     platforms: ['PS5', 'PS4'],
     image: game3
@@ -95,7 +95,7 @@ const featuredGames = [
     id: 4,
     title: 'Horizon Forbidden West',
     genre: 'Action RPG',
-    price: 59.99,
+    price: 3999,
     discount: 20,
     rating: 4.7,
     platforms: ['PS5', 'PS4'],
@@ -112,7 +112,7 @@ const upcomingGames = [
     platforms: ['Nintendo Switch'],
     image: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1938090/header.jpg',
     rating: 4.9,
-    price: 69.99,
+    price: 5999,
     isWishlist: false
   },
   {
@@ -123,7 +123,7 @@ const upcomingGames = [
     platforms: ['PS5'],
     image: 'https://cdn.cloudflare.steamstatic.com/steam/apps/2515020/header.jpg',
     rating: 4.8,
-    price: 69.99,
+    price: 5499,
     isWishlist: true
   },
   {
@@ -134,7 +134,7 @@ const upcomingGames = [
     platforms: ['PC', 'PS5', 'Xbox Series X'],
     image: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1774580/header.jpg',
     rating: 4.7,
-    price: 59.99,
+    price: 4999,
     isWishlist: false
   }
 ];
@@ -808,9 +808,9 @@ function Home() {
                       <div>
                         {game.discount ? (
                           <div className="flex items-center">
-                            <span className="text-gray-400 line-through mr-2">${game.price}</span>
+                            <span className="text-gray-400 line-through mr-2">₹{game.price}</span>
                             <span className="text-white font-bold">
-                              ${(game.price * (100 - game.discount) / 100).toFixed(2)}
+                              ₹{(game.price * (100 - game.discount) / 100).toFixed(2)}
                             </span>
                             <motion.span
                               className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded ml-2"
@@ -831,7 +831,7 @@ function Home() {
                             </motion.span>
                           </div>
                         ) : (
-                          <span className="text-white font-bold">${game.price}</span>
+                          <span className="text-white font-bold">₹{game.price}</span>
                         )}
                       </div>
                       <motion.div

@@ -10,7 +10,7 @@ export const sampleGames = [
     developer: "CD Projekt Red",
     publisher: "CD Projekt",
     rating: 4.2,
-    price: 59.99,
+    price: 3499,
     image: "/images/cyberpunk2077.jpg"
   },
   {
@@ -23,7 +23,7 @@ export const sampleGames = [
     developer: "CD Projekt Red",
     publisher: "CD Projekt",
     rating: 4.8,
-    price: 39.99,
+    price: 2499,
     image: "/images/witcher3.jpg"
   },
   {
@@ -36,7 +36,7 @@ export const sampleGames = [
     developer: "EA Sports",
     publisher: "Electronic Arts",
     rating: 4.0,
-    price: 69.99,
+    price: 4999,
     image: "/images/fifa2024.jpg"
   },
   {
@@ -49,7 +49,7 @@ export const sampleGames = [
     developer: "Mojang",
     publisher: "Microsoft Studios",
     rating: 4.5,
-    price: 26.99,
+    price: 1999,
     image: "/images/minecraft.jpg"
   },
   {
@@ -62,7 +62,7 @@ export const sampleGames = [
     developer: "Rockstar North",
     publisher: "Rockstar Games",
     rating: 4.6,
-    price: 29.99,
+    price: 2499,
     image: "/images/gtav.jpg"
   },
   {
@@ -75,7 +75,7 @@ export const sampleGames = [
     developer: "Innersloth",
     publisher: "Innersloth",
     rating: 4.3,
-    price: 4.99,
+    price: 399,
     image: "/images/amongus.jpg"
   },
   {
@@ -88,7 +88,7 @@ export const sampleGames = [
     developer: "Nintendo",
     publisher: "Nintendo",
     rating: 4.9,
-    price: 59.99,
+    price: 4999,
     image: "/images/zelda.jpg"
   },
   {
@@ -101,7 +101,7 @@ export const sampleGames = [
     developer: "Psyonix",
     publisher: "Psyonix",
     rating: 4.4,
-    price: 19.99,
+    price: 1499,
     image: "/images/rocketleague.jpg"
   }
 ];

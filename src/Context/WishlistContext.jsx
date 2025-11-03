@@ -17,15 +17,19 @@ export const WishlistProvider = ({ children }) => {
     const userId = user?.id || user?.userId || user?.UserId || user?.ID;
     
     if (!isAuthenticated || !userId) {
-      console.log('Wishlist: User not authenticated or no user ID');
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: User not authenticated or no user ID');
+      }
       setWishlist([]);
       // Clear localStorage when user is not authenticated
       localStorage.removeItem('userWishlist');
       return;
     }
 
-    console.log('Wishlist: Fetching wishlist for user:', userId);
-    console.log('Wishlist: Games loaded:', games.length);
+    if (import.meta.env.DEV) {
+      console.log('Wishlist: Fetching wishlist for user:', userId);
+      console.log('Wishlist: Games loaded:', games.length);
+    }
 
     setLoading(true);
     setError(null);
@@ -43,7 +47,9 @@ export const WishlistProvider = ({ children }) => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Wishlist: API Response:', data);
+        if (import.meta.env.DEV) {
+          console.log('Wishlist: API Response:', data);
+        }
         
         // Handle different response structures
         if (Array.isArray(data)) {
@@ -54,46 +60,62 @@ export const WishlistProvider = ({ children }) => {
           wishlistData = data.games;
         }
       } else {
-        console.warn('Wishlist: API returned error, using empty wishlist');
+        if (import.meta.env.DEV) {
+          console.warn('Wishlist: API returned error, using empty wishlist');
+        }
       }
 
       // Sync localStorage with API response (clear if empty)
       if (wishlistData.length === 0) {
         localStorage.removeItem('userWishlist');
-        console.log('Wishlist: Cleared localStorage - wishlist is empty');
+        if (import.meta.env.DEV) {
+          console.log('Wishlist: Cleared localStorage - wishlist is empty');
+        }
       } else {
         localStorage.setItem('userWishlist', JSON.stringify(wishlistData));
       }
 
       // Merge wishlist data with full game data
       const enrichedWishlist = wishlistData.map(wishlistItem => {
-        console.log('Wishlist: Processing wishlist item:', wishlistItem);
+        if (import.meta.env.DEV) {
+          console.log('Wishlist: Processing wishlist item:', wishlistItem);
+        }
 
         // Extract gameId from various possible fields
         const gameId = wishlistItem.gameId || wishlistItem.GameId || wishlistItem.id;
 
         // Check if wishlistItem already contains full game data
         if (wishlistItem.title && wishlistItem.image) {
-          console.log('Wishlist: Item already contains full game data');
+          if (import.meta.env.DEV) {
+            console.log('Wishlist: Item already contains full game data');
+          }
           return { ...wishlistItem, id: gameId };
         }
 
         // Otherwise, find the game in the games array
         const fullGame = games.find(game => game.id === gameId);
-        console.log('Wishlist: Found game:', fullGame?.title || 'Not found');
+        if (import.meta.env.DEV) {
+          console.log('Wishlist: Found game:', fullGame?.title || 'Not found');
+        }
 
         if (fullGame) {
           return { ...fullGame, wishlistId: wishlistItem.id, addedAt: wishlistItem.addedAt };
         } else {
-          console.log('Wishlist: Game not found in games array, skipping');
+          if (import.meta.env.DEV) {
+            console.log('Wishlist: Game not found in games array, skipping');
+          }
           return null;
         }
       }).filter(Boolean); // Remove null items (games not found)
 
-      console.log('Wishlist: Enriched wishlist:', enrichedWishlist);
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: Enriched wishlist:', enrichedWishlist);
+      }
       setWishlist(enrichedWishlist);
     } catch (error) {
-      console.error('Wishlist: Error fetching wishlist:', error);
+      if (import.meta.env.DEV) {
+        console.error('Wishlist: Error fetching wishlist:', error);
+      }
       setError(error.message);
       // Fallback to empty wishlist on error
       setWishlist([]);
@@ -109,27 +131,35 @@ export const WishlistProvider = ({ children }) => {
     const userId = user?.id || user?.userId || user?.UserId || user?.ID;
     
     if (!isAuthenticated || !userId) {
-      console.log('Wishlist: Cannot add - user not authenticated');
-      console.log('Wishlist: isAuthenticated:', isAuthenticated);
-      console.log('Wishlist: user:', user);
-      console.log('Wishlist: userId:', userId);
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: Cannot add - user not authenticated');
+        console.log('Wishlist: isAuthenticated:', isAuthenticated);
+        console.log('Wishlist: user:', user);
+        console.log('Wishlist: userId:', userId);
+      }
       throw new Error('Please login to add items to wishlist');
     }
 
-    console.log('Wishlist: Adding game to wishlist:', gameId);
-    console.log('Wishlist: userId:', userId);
+    if (import.meta.env.DEV) {
+      console.log('Wishlist: Adding game to wishlist:', gameId);
+      console.log('Wishlist: userId:', userId);
+    }
 
     setLoading(true);
     setError(null);
 
     try {
       await addGameToWishlist(userId, gameId, token);
-      console.log('Wishlist: Successfully added game, refreshing wishlist...');
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: Successfully added game, refreshing wishlist...');
+      }
       // Refresh wishlist after adding
       await fetchWishlist();
       return true;
     } catch (error) {
-      console.error('Wishlist: Error adding to wishlist:', error);
+      if (import.meta.env.DEV) {
+        console.error('Wishlist: Error adding to wishlist:', error);
+      }
       setError(error.message);
       throw error;
     } finally {
@@ -142,11 +172,15 @@ export const WishlistProvider = ({ children }) => {
     const userId = user?.id || user?.userId || user?.UserId || user?.ID;
     
     if (!isAuthenticated || !userId) {
-      console.log('Wishlist: Cannot remove - user not authenticated');
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: Cannot remove - user not authenticated');
+      }
       throw new Error('Please login to manage wishlist');
     }
 
-    console.log('Wishlist: Removing game from wishlist:', gameId);
+    if (import.meta.env.DEV) {
+      console.log('Wishlist: Removing game from wishlist:', gameId);
+    }
 
     setLoading(true);
     setError(null);
@@ -170,12 +204,16 @@ export const WishlistProvider = ({ children }) => {
         throw new Error(errorText || `Failed to remove from wishlist (${response.status})`);
       }
 
-      console.log('Wishlist: Successfully removed game from API');
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: Successfully removed game from API');
+      }
       
       // Immediately update local state for instant UI feedback
       setWishlist(prevWishlist => {
         const updated = prevWishlist.filter(item => item.id !== gameId);
-        console.log('Wishlist: Updated local state, new count:', updated.length);
+        if (import.meta.env.DEV) {
+          console.log('Wishlist: Updated local state, new count:', updated.length);
+        }
         return updated;
       });
       
@@ -189,17 +227,23 @@ export const WishlistProvider = ({ children }) => {
             item.gameId !== gameId && item.GameId !== gameId && item.id !== gameId
           );
           localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(updatedWishlist));
-          console.log('Wishlist: Updated localStorage after removal');
+          if (import.meta.env.DEV) {
+            console.log('Wishlist: Updated localStorage after removal');
+          }
         }
       } catch (e) {
-        console.warn('Wishlist: Failed to update localStorage:', e);
+        if (import.meta.env.DEV) {
+          console.warn('Wishlist: Failed to update localStorage:', e);
+        }
       }
       
       // Refresh wishlist from API to ensure consistency
       await fetchWishlist();
       return true;
     } catch (error) {
-      console.error('Wishlist: Error removing from wishlist:', error);
+      if (import.meta.env.DEV) {
+        console.error('Wishlist: Error removing from wishlist:', error);
+      }
       setError(error.message);
       throw error;
     } finally {
@@ -213,8 +257,10 @@ export const WishlistProvider = ({ children }) => {
       return false;
     }
     const inWishlist = wishlist.some(item => item.id === gameId);
-    console.log(`Wishlist: Checking if game ${gameId} is in wishlist:`, inWishlist);
-    console.log('Wishlist: Current wishlist:', wishlist.map(item => item.id));
+    if (import.meta.env.DEV) {
+      console.log(`Wishlist: Checking if game ${gameId} is in wishlist:`, inWishlist);
+      console.log('Wishlist: Current wishlist:', wishlist.map(item => item.id));
+    }
     return inWishlist;
   };
 
@@ -225,25 +271,34 @@ export const WishlistProvider = ({ children }) => {
 
   // Load wishlist when user authentication or games data changes
   useEffect(() => {
-    console.log('Wishlist: useEffect triggered');
-    console.log('Wishlist: isAuthenticated:', isAuthenticated);
-    console.log('Wishlist: user:', user);
-    console.log('Wishlist: games count:', games.length);
+    if (import.meta.env.DEV) {
+      console.log('Wishlist: useEffect triggered');
+      console.log('Wishlist: isAuthenticated:', isAuthenticated);
+      console.log('Wishlist: user:', user);
+      console.log('Wishlist: games count:', games.length);
+    }
 
     if (isAuthenticated && user?.id && games.length > 0) {
-      console.log('Wishlist: All conditions met, fetching wishlist...');
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: All conditions met, fetching wishlist...');
+      }
       fetchWishlist();
     } else {
-      console.log('Wishlist: Conditions not met, clearing wishlist');
+      if (import.meta.env.DEV) {
+        console.log('Wishlist: Conditions not met, clearing wishlist');
+      }
       setWishlist([]);
       // Clear localStorage when conditions are not met
       localStorage.removeItem('userWishlist');
     }
-  }, [isAuthenticated, user?.id, token, games]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user?.id, games.length]);
 
   // Force clear wishlist (for debugging/manual clearing)
   const clearWishlist = () => {
-    console.log('Wishlist: Force clearing wishlist');
+    if (import.meta.env.DEV) {
+      console.log('Wishlist: Force clearing wishlist');
+    }
     setWishlist([]);
     localStorage.removeItem('userWishlist');
   };
