@@ -7,12 +7,14 @@ import { PublicRoute } from "./routes/PublicRoute";
 import { ReviewProvider } from "./Context/ReviewContext";
 import { ThemeProvider } from "./Context/ThemeContext";
 import ErrorBoundary from "./Components/ErrorBoundary/ErrorBoundary";
+import CustomCursor from "./Components/CustomCursor/CustomCursor";
 
 const App = () => {
   return (
     <ErrorBoundary>
       <ThemeProvider>
         <ReviewProvider>
+          <CustomCursor />
           <ToastContainer
             position="top-right"
             autoClose={3000}

@@ -1,6 +1,87 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* Custom Animated Gaming Cursor */
+* {
+  cursor: none !important;
+}
+
+body {
+  cursor: none;
+}
+
+/* Custom cursor dot */
+.custom-cursor {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #00ff00;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 999999 !important;
+  transition: width 0.15s ease, height 0.15s ease;
+  transform: translate(-50%, -50%) translateZ(0);
+  background: rgba(255, 255, 0, 0.8);
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
+  will-change: transform;
+  backface-visibility: hidden;
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Cursor trail/outer ring */
+.custom-cursor-outline {
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(0, 255, 0, 0.5);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 999998 !important;
+  transition: width 0.15s ease, height 0.15s ease;
+  transform: translate(-50%, -50%) translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  background: rgba(255, 255, 0, 0.15);
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Cursor hover state - grows larger */
+.custom-cursor.hover {
+  width: 35px;
+  height: 35px;
+  background: rgba(255, 0, 255, 0.8);
+  border-color: #ff00ff;
+  box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+}
+
+.custom-cursor-outline.hover {
+  width: 55px;
+  height: 55px;
+  border-color: rgba(255, 0, 255, 0.6);
+  background: rgba(255, 0, 255, 0.15);
+}
+
+/* Click effect - simplified */
+.custom-cursor.click {
+  transform: translate(-50%, -50%) translateZ(0) scale(0.85);
+}
+
+/* Hide cursor on mobile/touch devices */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    cursor: auto !important;
+  }
+  
+  .custom-cursor,
+  .custom-cursor-outline {
+    display: none;
+  }
+}
+
 /* Line clamp utilities for text truncation */
 .line-clamp-2 {
   display: -webkit-box;
