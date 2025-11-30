@@ -9,7 +9,7 @@ const LazyImage = ({ src, alt, className, fallback, onError }) => {
 
   useEffect(() => {
     let observer;
-    
+
     if (imgRef.current) {
       observer = new IntersectionObserver(
         (entries) => {

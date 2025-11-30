@@ -12,6 +12,7 @@ import SEO from '../Components/SEO/SEO';
 import Breadcrumbs from '../Components/Breadcrumbs/Breadcrumbs';
 import { EmptyWishlist } from '../Components/EmptyState/EmptyState';
 import ConfirmDialog from '../Components/ConfirmDialog/ConfirmDialog';
+import WishlistExport from '../Components/WishlistExport/WishlistExport';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../Components/Footer/Footer';
 
@@ -70,7 +71,7 @@ const Wishlist = () => {
       console.log('[Wishlist Debug] user:', user);
       console.log('[Wishlist Debug] token:', token);
       console.log('[Wishlist Debug] isAuthenticated:', isAuthenticated);
-      
+
       // Try to get userId from user object or token claims
       const tokenPayload = decodeJwtPayload(token) || {};
       const userId = (
@@ -91,7 +92,7 @@ const Wishlist = () => {
       try {
         setLoading(true);
         console.log('Fetching wishlist for userId:', userId);
-        
+
         const response = await fetch(`https://localhost:7270/api/UserGame/wishlist/${userId}`, {
           headers: {
             'Content-Type': 'application/json',
@@ -111,10 +112,10 @@ const Wishlist = () => {
         console.log('Wishlist API response data:', data);
         console.log('Response type:', typeof data);
         console.log('Is array?', Array.isArray(data));
-        
+
         // Handle different response structures
         let wishlistData = [];
-        
+
         if (Array.isArray(data)) {
           wishlistData = data;
         } else if (data?.data && Array.isArray(data.data)) {
@@ -127,7 +128,7 @@ const Wishlist = () => {
           // If it's a single object, wrap it in an array
           wishlistData = [data];
         }
-        
+
         // Normalize items: if backend returns wishlist entries with nested game property, unwrap it
         const normalized = wishlistData.map(item => {
           // Common shapes: { id, userId, gameId, addedAt }, { id, userId, game: {...} }, or direct game object
@@ -184,7 +185,7 @@ const Wishlist = () => {
       // Determine the actual gameId present in the entry
       console.log('[Wishlist Debug] Item passed to remove:', itemOrGameId);
       console.log('[Wishlist Debug] Item structure:', JSON.stringify(itemOrGameId, null, 2));
-      
+
       // Backend returns Game objects with Id (capital I) from GetWishlist endpoint
       const gameId = typeof itemOrGameId === 'object'
         ? (itemOrGameId.id || itemOrGameId.Id || itemOrGameId.gameId || itemOrGameId.GameId)
@@ -221,7 +222,7 @@ const Wishlist = () => {
 
       // Only update UI state after successful API removal
       // Filter by Id/id since backend returns Game objects with Id property
-      setWishlist(prevWishlist => 
+      setWishlist(prevWishlist =>
         prevWishlist.filter(item => {
           const itemGameId = item.id || item.Id || item.gameId || item.GameId;
           return itemGameId !== gameId;
@@ -285,7 +286,7 @@ const Wishlist = () => {
 
   return (
     <>
-      <SEO 
+      <SEO
         title="My Wishlist - GameHatch | Your Saved Games"
         description="View and manage your wishlist of favorite games. Keep track of games you want to play and purchase them when ready."
         keywords="wishlist, saved games, favorite games, game collection"
@@ -295,7 +296,7 @@ const Wishlist = () => {
           <div className="container mx-auto px-4 py-8">
             {/* Breadcrumbs */}
             <Breadcrumbs />
-            
+
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-4xl font-bold text-white mb-4 flex items-center">
@@ -307,87 +308,90 @@ const Wishlist = () => {
               </p>
             </div>
 
-          {/* Wishlist Grid */}
-          {wishlist.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {wishlist.map((game, index) => (
-                <motion.div
-                  key={game.id}
-                  className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  {/* Game Image */}
-                  <div className="relative">
-                    <LazyImage
-                      src={getImageUrl(
-                        game.image || game.imageUrl || game.posterUrl || game.thumbnail || game.coverImage || game.imagePath
-                      )}
-                      alt={game.title || game.name || 'Game'}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <button
-                        onClick={() => openRemoveConfirmation(game)}
-                        className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all"
-                        title="Remove from wishlist"
-                        aria-label={`Remove ${game.title || 'game'} from wishlist`}
-                      >
-                        <FaHeart aria-hidden="true" />
-                      </button>
-                    </div>
-                    <div className="absolute top-2 left-2">
-                      <button
-                        onClick={() => openRemoveConfirmation(game)}
-                        className="p-2 rounded-full bg-gray-900/70 text-white hover:bg-red-500 transition-all"
-                        title="Remove from wishlist"
-                        aria-label={`Delete ${game.title || 'game'} from wishlist`}
-                      >
-                        <FaTrash className="text-sm" aria-hidden="true" />
-                      </button>
-                    </div>
-                  </div>
+            {/* Export Section - Only show if wishlist has items */}
+            {wishlist.length > 0 && <WishlistExport wishlist={wishlist} />}
 
-                  {/* Game Details */}
-                  <div className="p-4">
-                    <h3 className="text-white font-semibold text-lg mb-2 line-clamp-2">
-                      {game.title}
-                    </h3>
-
-                    <p className="text-gray-400 text-sm mb-2">
-                      {game.category || 'Action'}
-                    </p>
-
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2" role="img" aria-label="Rating">
-                        <FaStar className="text-yellow-400" aria-hidden="true" />
-                        <span className="text-gray-300 text-sm">4.5</span>
+            {/* Wishlist Grid */}
+            {wishlist.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {wishlist.map((game, index) => (
+                  <motion.div
+                    key={game.id}
+                    className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    {/* Game Image */}
+                    <div className="relative">
+                      <LazyImage
+                        src={getImageUrl(
+                          game.image || game.imageUrl || game.posterUrl || game.thumbnail || game.coverImage || game.imagePath
+                        )}
+                        alt={game.title || game.name || 'Game'}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <button
+                          onClick={() => openRemoveConfirmation(game)}
+                          className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all"
+                          title="Remove from wishlist"
+                          aria-label={`Remove ${game.title || 'game'} from wishlist`}
+                        >
+                          <FaHeart aria-hidden="true" />
+                        </button>
                       </div>
-                      <span className="text-green-400 font-semibold" aria-label="Price">
-                        ₹{typeof game.price === 'number' ? game.price.toFixed(2) : parseFloat(game.price || 0).toFixed(2)}
-                      </span>
+                      <div className="absolute top-2 left-2">
+                        <button
+                          onClick={() => openRemoveConfirmation(game)}
+                          className="p-2 rounded-full bg-gray-900/70 text-white hover:bg-red-500 transition-all"
+                          title="Remove from wishlist"
+                          aria-label={`Delete ${game.title || 'game'} from wishlist`}
+                        >
+                          <FaTrash className="text-sm" aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => handleAddToCart(game)}
-                        className="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-2 px-3 rounded-md font-medium transition-all flex items-center justify-center space-x-1"
-                        aria-label={`Add ${game.title || 'game'} to cart`}
-                      >
-                        <FaShoppingCart className="text-sm" aria-hidden="true" />
-                        <span>Add to Cart</span>
-                      </button>
+                    {/* Game Details */}
+                    <div className="p-4">
+                      <h3 className="text-white font-semibold text-lg mb-2 line-clamp-2">
+                        {game.title}
+                      </h3>
+
+                      <p className="text-gray-400 text-sm mb-2">
+                        {game.category || 'Action'}
+                      </p>
+
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2" role="img" aria-label="Rating">
+                          <FaStar className="text-yellow-400" aria-hidden="true" />
+                          <span className="text-gray-300 text-sm">4.5</span>
+                        </div>
+                        <span className="text-green-400 font-semibold" aria-label="Price">
+                          ₹{typeof game.price === 'number' ? game.price.toFixed(2) : parseFloat(game.price || 0).toFixed(2)}
+                        </span>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleAddToCart(game)}
+                          className="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-2 px-3 rounded-md font-medium transition-all flex items-center justify-center space-x-1"
+                          aria-label={`Add ${game.title || 'game'} to cart`}
+                        >
+                          <FaShoppingCart className="text-sm" aria-hidden="true" />
+                          <span>Add to Cart</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            /* Empty Wishlist */
-            <EmptyWishlist onBrowseGames={() => navigate('/games')} />
-          )}
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              /* Empty Wishlist */
+              <EmptyWishlist onBrowseGames={() => navigate('/games')} />
+            )}
           </div>
         </div>
         <Footer />

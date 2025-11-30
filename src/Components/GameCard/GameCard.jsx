@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { downloadGameCard } from '../../utils/gameExport';
 import { useWishlist } from '../../Context/WishlistContext';
 import { useAuth } from '../../Context/Authcontext';
+import { toast } from 'react-toastify';
 
 const GameCard = ({ game, index = 0 }) => {
   const [imgError, setImgError] = useState(false);
@@ -18,21 +19,21 @@ const GameCard = ({ game, index = 0 }) => {
   // Helper function to get image URL from various possible properties
   const getImageUrl = (game) => {
     const imageUrl = game.image || game.imageUrl || game.ImageUrl || game.posterUrl || game.thumbnail || game.coverImage || game.imagePath;
-    
+
     if (!imageUrl) return null;
-    
+
     // If it's already a full URL
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return imageUrl;
     }
-    
+
     // If backend sends path like "/uploads/filename.jpg"
     if (imageUrl.startsWith('/uploads/')) {
       const filename = imageUrl.substring('/uploads/'.length);
       const encodedFilename = encodeURIComponent(filename);
       return `https://localhost:7270/uploads/${encodedFilename}`;
     }
-    
+
     // If it's just a filename
     const encodedFilename = encodeURIComponent(imageUrl.trim());
     return `https://localhost:7270/uploads/${encodedFilename}`;
@@ -49,7 +50,7 @@ const GameCard = ({ game, index = 0 }) => {
 
     if (!isAuthenticated) {
       console.log('GameCard: User not authenticated, showing login prompt');
-      alert('Please login to add games to your wishlist');
+      toast.error('🔐 Please login to add games to your wishlist');
       return;
     }
 
@@ -59,15 +60,15 @@ const GameCard = ({ game, index = 0 }) => {
       if (isInWishlist(game.id)) {
         console.log('GameCard: Removing from wishlist');
         await removeFromWishlist(game.id);
-        alert('Game removed from wishlist successfully!');
+        toast.success('💔 Game removed from wishlist');
       } else {
         console.log('GameCard: Adding to wishlist');
         await addToWishlist(game.id);
-        alert('Game added to wishlist successfully!');
+        toast.success('❤️ Game added to wishlist!');
       }
     } catch (error) {
       console.error('GameCard: Wishlist operation failed:', error);
-      alert(error.message || 'Something went wrong while adding to wishlist.');
+      toast.error(`❌ ${error.message || 'Something went wrong'}`);
     }
   };
 
@@ -199,11 +200,10 @@ const GameCard = ({ game, index = 0 }) => {
 
         {/* Wishlist button */}
         <motion.button
-          className={`absolute top-2 ${game.discount ? 'right-16' : 'right-2'} p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-            isInWishlist(game.id)
+          className={`absolute top-2 ${game.discount ? 'right-16' : 'right-2'} p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(game.id)
               ? 'bg-red-500/90 text-white hover:bg-red-600'
               : 'bg-black/50 text-white hover:bg-red-500/70 hover:text-white'
-          }`}
+            }`}
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{
@@ -368,7 +368,7 @@ const GameCard = ({ game, index = 0 }) => {
               </motion.span>
             )}
           </div>
-{/* 
+          {/* 
           <motion.div
             className="flex gap-2"
             initial={{ opacity: 0, y: 10 }}

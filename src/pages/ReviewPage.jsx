@@ -1,8 +1,13 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ReviewContext } from '../Context/ReviewContext';
 import { useAuth } from '../Context/Authcontext';
+import { toast } from 'react-toastify';
 import './ReviewPage.css';
+import CyberpunkDivider from '../Components/CyberpunkDivider';
+import ReviewAnalyticsChart from '../Components/ReviewAnalyticsChart';
+import ReviewForm from '../Components/ReviewForm';
+import ConfirmDialog from '../Components/ConfirmDialog/ConfirmDialog';
 
 const ReviewPage = () => {
   const { addReview, getAllReviews, getReviewsByGame, fetchReviews, deleteReview } = useContext(ReviewContext);
@@ -10,23 +15,16 @@ const ReviewPage = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
 
-  const [formData, setFormData] = useState({
-    gameName: '',
-    rating: 5,
-    reviewText: '',
-    reviewerName: ''
-  });
   const [submitted, setSubmitted] = useState(false);
   const [displayReviews, setDisplayReviews] = useState([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [currentGameName, setCurrentGameName] = useState('');
+  const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, reviewId: null });
 
   // Pre-populate game name if coming from game page
   useEffect(() => {
     if (location.state?.gameName) {
-      setFormData(prev => ({
-        ...prev,
-        gameName: location.state.gameName
-      }));
+      setCurrentGameName(location.state.gameName);
     }
     // Load reviews for this specific game from API
     if (location.state?.gameId) {
@@ -87,63 +85,7 @@ const ReviewPage = () => {
     loadReviewsFromStorage();
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    console.log('Review submit - user:', user);
-    console.log('Review submit - token:', token);
-    
-    if (!formData.gameName || !formData.reviewText || !formData.reviewerName) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    // Get gameId from location state or prompt user
-    const gameId = location.state?.gameId;
-    if (!gameId) {
-      alert('Game ID is required. Please navigate from a game page.');
-      return;
-    }
-
-    const reviewData = {
-      gameId: gameId,
-      gameName: formData.gameName,
-      rating: formData.rating,
-      reviewText: formData.reviewText,
-      reviewerName: formData.reviewerName
-    };
-
-    try {
-      await addReview(reviewData, { user, token });
-
-      // Reset form
-      setFormData({
-        gameName: location.state?.gameName || '',
-        rating: 5,
-        reviewText: '',
-        reviewerName: ''
-      });
-
-      setSubmitted(true);
-
-      // Reload reviews for this game from API after successful submission
-      if (gameId) {
-        await loadReviewsForGame(gameId);
-      }
-
-      setTimeout(() => setSubmitted(false), 3000);
-    } catch (error) {
-      alert(error.message || 'Failed to submit review');
-    }
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Unknown date';
@@ -160,23 +102,27 @@ const ReviewPage = () => {
   };
 
   const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm('Are you sure you want to delete this review?')) {
-      return;
-    }
+    setDeleteDialog({ isOpen: true, reviewId });
+  };
+
+  const confirmDelete = async () => {
+
+    const reviewId = deleteDialog.reviewId;
+    if (!reviewId) return;
 
     try {
       await deleteReview(reviewId, token);
-      
+
       // Reload reviews after deletion
       if (location.state?.gameId) {
         await loadReviewsForGame(location.state.gameId);
       } else {
         loadReviewsFromStorage();
       }
-      
-      alert('Review deleted successfully!');
+
+      toast.success('🗑️ Review deleted successfully!');
     } catch (error) {
-      alert(error.message || 'Failed to delete review');
+      toast.error(`❌ ${error.message || 'Failed to delete review'}`);
     }
   };
 
@@ -184,121 +130,186 @@ const ReviewPage = () => {
     // Check if the current user is the author of the review
     const currentUserId = user?.id || user?.userId || user?.UserId || user?.Id;
     const reviewUserId = review.userId || review.userID || review.UserId || review.UserID;
-    
+
     console.log('Delete check - Current User:', user);
     console.log('Delete check - Current UserId:', currentUserId);
     console.log('Delete check - Review:', review);
     console.log('Delete check - Review UserId:', reviewUserId);
     console.log('Delete check - Can delete:', currentUserId && reviewUserId && currentUserId === reviewUserId);
-    
+
     // For now, allow any logged-in user to delete any review (you can restrict this later)
     return !!user && !!token;
-    
+
     // Uncomment below to restrict deletion to only the review author:
     // return currentUserId && reviewUserId && currentUserId === reviewUserId;
   };
 
+  // Define filteredReviews first (needed by analyticsData)
   const filteredReviews = showAllReviews
     ? displayReviews
-    : displayReviews.filter(review => review.gameName === formData.gameName);
+    : displayReviews.filter(review => review.gameName === (currentGameName || location.state?.gameName));
+
+  // Calculate analytics data for the chart - split into sentiment and tags
+  const analyticsData = useMemo(() => {
+    const reviewsToAnalyze = filteredReviews;
+    if (!reviewsToAnalyze || reviewsToAnalyze.length === 0) return { sentiment: [], tags: [] };
+
+    const sentimentStats = {
+      'Positive': 0,
+      'Negative': 0,
+      'Mixed': 0
+    };
+
+    const tagStats = {
+      'Story': 0,
+      'Gameplay': 0,
+      'Graphics': 0,
+      'Performance': 0,
+      'Sound': 0,
+      'Multiplayer': 0
+    };
+
+    reviewsToAnalyze.forEach(review => {
+      const rating = parseInt(review.rating);
+
+      // Sentiment Logic
+      if (rating >= 4) sentimentStats['Positive']++;
+      else if (rating <= 2) sentimentStats['Negative']++;
+      else sentimentStats['Mixed']++;
+
+      // Tag Logic - PRIORITIZE user-selected tags from the form
+      if (review.tags && Array.isArray(review.tags) && review.tags.length > 0) {
+        // User explicitly selected these tags in the form
+        review.tags.forEach(tag => {
+          if (tagStats[tag] !== undefined) {
+            tagStats[tag]++;
+          }
+        });
+      } else {
+        // Fallback: Auto-detect from text for legacy reviews without tags
+        const text = (review.reviewText || review.comment || '').toLowerCase();
+        if (text.includes('story') || text.includes('plot') || text.includes('narrative')) tagStats['Story']++;
+        if (text.includes('gameplay') || text.includes('fun') || text.includes('mechanic')) tagStats['Gameplay']++;
+        if (text.includes('graphics') || text.includes('visual') || text.includes('art')) tagStats['Graphics']++;
+        if (text.includes('performance') || text.includes('lag') || text.includes('fps') || text.includes('bug')) tagStats['Performance']++;
+        if (text.includes('sound') || text.includes('music') || text.includes('audio')) tagStats['Sound']++;
+        if (text.includes('multiplayer') || text.includes('online') || text.includes('co-op')) tagStats['Multiplayer']++;
+      }
+    });
+
+    return {
+      sentiment: Object.entries(sentimentStats)
+        .map(([name, value]) => ({ name, value }))
+        .filter(item => item.value > 0),
+      tags: Object.entries(tagStats)
+        .map(([name, value]) => ({ name, value }))
+        .filter(item => item.value > 0)
+    };
+  }, [filteredReviews]);
+
+  const handleFormSubmit = async (formData) => {
+    // Wrapper to adapt ReviewForm data to the existing addReview context function
+    const gameId = location.state?.gameId;
+    if (!gameId) {
+      toast.error('🎮 Game ID is required. Please navigate from a game page.');
+      return;
+    }
+
+    const reviewData = {
+      gameId: gameId,
+      gameName: formData.gameName,
+      rating: formData.rating,
+      reviewText: formData.reviewText,
+      reviewerName: formData.reviewerName,
+      tags: formData.tags // Pass tags to backend (even if backend ignores them, we use them locally)
+    };
+
+    try {
+      await addReview(reviewData, { user, token });
+
+      // Optimistically add to displayReviews to show immediate update in chart
+      // (The context might already do this, but let's ensure it for the "Real-time" feel)
+      const newReview = { ...reviewData, id: Date.now(), createdAt: new Date().toISOString() };
+      setDisplayReviews(prev => [newReview, ...prev]);
+
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch (error) {
+      toast.error(`❌ ${error.message || 'Failed to submit review'}`);
+    }
+  };
+
+
 
   return (
     <div className="review-page">
-      <div className="review-container">
-        <h1>Add Game Review</h1>
-        <p>Share your gaming experience with the community!</p>
+      <div className="review-container max-w-7xl mx-auto px-4">
+        <h1 className="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 mb-2 font-orbitron">
+          Mission Report
+        </h1>
+        <p className="text-center text-slate-400 mb-8">Submit your analysis and view live community intelligence.</p>
 
         {location.state?.gameName && (
-          <div className="game-info-banner">
-            <span>📝 Reviewing: <strong>{location.state.gameName}</strong></span>
-            <button
-              onClick={() => navigate(-1)}
-              className="back-btn"
-            >
-              ← Back to Game
-            </button>
+          <div className="game-info-banner mb-8">
+            <span>📝 Target: <strong>{location.state.gameName}</strong></span>
+            <button onClick={() => navigate(-1)} className="back-btn">← Abort</button>
           </div>
         )}
 
         {submitted && (
-          <div className="success-message">
-            ✅ Review submitted successfully!
+          <div className="success-message mb-6 text-center bg-green-500/20 border border-green-500/50 text-green-200 p-4 rounded-lg backdrop-blur-md">
+            ✅ Data Upload Complete. Intelligence Updated.
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="review-form">
-          <div className="form-group">
-            <label htmlFor="gameName">Game Name *</label>
-            <input
-              type="text"
-              id="gameName"
-              name="gameName"
-              value={formData.gameName}
-              onChange={handleChange}
-              placeholder="Enter the game name"
-              required
+        {/* Dashboard Grid: Form + Analytics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 items-stretch">
+
+          {/* Left: Review Form */}
+          <div className="h-full">
+            <ReviewForm
+              onSubmit={handleFormSubmit}
+              initialGameName={location.state?.gameName || ''}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="reviewerName">Your Name *</label>
-            <input
-              type="text"
-              id="reviewerName"
-              name="reviewerName"
-              value={formData.reviewerName}
-              onChange={handleChange}
-              placeholder="Enter your name"
-              required
+          {/* Right: Sentiment Analytics */}
+          <div className="h-full min-h-[500px]">
+            <ReviewAnalyticsChart
+              data={analyticsData.sentiment.length > 0 ? analyticsData.sentiment : undefined}
+              title="Sentiment Vibe"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="rating">Rating *</label>
-            <select
-              id="rating"
-              name="rating"
-              value={formData.rating}
-              onChange={handleChange}
-              className="rating-select"
-            >
-              <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-              <option value="4">⭐⭐⭐⭐ (4/5)</option>
-              <option value="3">⭐⭐⭐ (3/5)</option>
-              <option value="2">⭐⭐ (2/5)</option>
-              <option value="1">⭐ (1/5)</option>
-            </select>
-          </div>
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="reviewText">Your Review *</label>
-            <textarea
-              id="reviewText"
-              name="reviewText"
-              value={formData.reviewText}
-              onChange={handleChange}
-              placeholder="Share your thoughts about the game..."
-              rows="6"
-              required
-            />
+        {/* Second Row: Tag Analytics */}
+        {analyticsData.tags.length > 0 && (
+          <div className="mb-8 flex justify-center">
+            <div className="w-full max-w-2xl">
+              <ReviewAnalyticsChart
+                data={analyticsData.tags}
+                title={currentGameName ? `${currentGameName} - Feature Analysis` : "Feature Analysis"}
+              />
+            </div>
           </div>
+        )}
 
-          <button type="submit" className="submit-btn">
-            Submit Review
-          </button>
-        </form>
+        {/* Cyberpunk Divider */}
+        <CyberpunkDivider />
 
         {/* Reviews Display Section */}
-        <div className="reviews-section">
+        <div className="reviews-section mt-8">
+
           <div className="reviews-header">
             <h2>Game Reviews</h2>
             <div className="reviews-toggle">
-              <button
+              {/* <button
                 className={!showAllReviews ? 'active' : ''}
                 onClick={() => setShowAllReviews(false)}
               >
                 {formData.gameName ? `Reviews for ${formData.gameName}` : 'Current Game Reviews'}
-              </button>
+              </button> */}
               <button
                 className={showAllReviews ? 'active' : ''}
                 onClick={() => setShowAllReviews(true)}
@@ -353,6 +364,17 @@ const ReviewPage = () => {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, reviewId: null })}
+        onConfirm={confirmDelete}
+        title="⚠️ Delete Review"
+        message="Are you sure you want to permanently delete this review? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };
