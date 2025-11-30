@@ -2,8 +2,6 @@ import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import "./index.css";
 import App from "./App.jsx";
-import './utils/clearWishlist.js';
-import { ToastContainer } from "react-toastify";
 import { store } from "./Redux/store.js";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./Context/Authcontext.jsx";
@@ -17,7 +15,6 @@ createRoot(document.getElementById("root")).render(
         <WishlistProvider>
           <BrowserRouter>
             <App />
-            <ToastContainer />
           </BrowserRouter>
         </WishlistProvider>
       </AuthProvider>

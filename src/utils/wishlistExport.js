@@ -8,8 +8,6 @@ import { saveAs } from 'file-saver';
  */
 export const exportWishlistToPDF = (wishlist) => {
     try {
-        console.log('Starting PDF export with', wishlist.length, 'games');
-
         const doc = new jsPDF();
 
         // Add title
@@ -31,8 +29,6 @@ export const exportWishlistToPDF = (wishlist) => {
             `₹${typeof game.price === 'number' ? game.price.toFixed(2) : parseFloat(game.price || 0).toFixed(2)}`,
             game.rating || '4.5'
         ]);
-
-        console.log('Table data prepared:', tableData.length, 'rows');
 
         // Add table
         doc.autoTable({
@@ -83,11 +79,9 @@ export const exportWishlistToPDF = (wishlist) => {
 
         // Save the PDF
         const filename = `GameHatch_Wishlist_${new Date().toISOString().split('T')[0]}.pdf`;
-        console.log('Saving PDF as:', filename);
         doc.save(filename);
-        console.log('PDF export completed successfully');
     } catch (error) {
-        console.error('Error in exportWishlistToPDF:', error);
+        console.error('Error exporting PDF:', error);
         throw error;
     }
 };
@@ -96,128 +90,133 @@ export const exportWishlistToPDF = (wishlist) => {
  * Export wishlist to Word document
  */
 export const exportWishlistToWord = async (wishlist) => {
-    // Create table rows
-    const tableRows = [
-        // Header row
-        new TableRow({
-            children: [
-                new TableCell({
-                    children: [new Paragraph({ text: '#', bold: true, alignment: AlignmentType.CENTER })],
-                    shading: { fill: '06B6D4' }, // Cyan
-                    width: { size: 10, type: WidthType.PERCENTAGE }
-                }),
-                new TableCell({
-                    children: [new Paragraph({ text: 'Game Title', bold: true })],
-                    shading: { fill: '06B6D4' },
-                    width: { size: 40, type: WidthType.PERCENTAGE }
-                }),
-                new TableCell({
-                    children: [new Paragraph({ text: 'Category', bold: true })],
-                    shading: { fill: '06B6D4' },
-                    width: { size: 20, type: WidthType.PERCENTAGE }
-                }),
-                new TableCell({
-                    children: [new Paragraph({ text: 'Price', bold: true, alignment: AlignmentType.RIGHT })],
-                    shading: { fill: '06B6D4' },
-                    width: { size: 15, type: WidthType.PERCENTAGE }
-                }),
-                new TableCell({
-                    children: [new Paragraph({ text: 'Rating', bold: true, alignment: AlignmentType.CENTER })],
-                    shading: { fill: '06B6D4' },
-                    width: { size: 15, type: WidthType.PERCENTAGE }
-                })
-            ]
-        }),
-        // Data rows
-        ...wishlist.map((game, index) =>
+    try {
+        // Create table rows
+        const tableRows = [
+            // Header row
             new TableRow({
                 children: [
                     new TableCell({
-                        children: [new Paragraph({ text: String(index + 1), alignment: AlignmentType.CENTER })]
+                        children: [new Paragraph({ text: '#', bold: true, alignment: AlignmentType.CENTER })],
+                        shading: { fill: '06B6D4' }, // Cyan
+                        width: { size: 10, type: WidthType.PERCENTAGE }
                     }),
                     new TableCell({
-                        children: [new Paragraph({ text: game.title || 'Unknown Game' })]
+                        children: [new Paragraph({ text: 'Game Title', bold: true })],
+                        shading: { fill: '06B6D4' },
+                        width: { size: 40, type: WidthType.PERCENTAGE }
                     }),
                     new TableCell({
-                        children: [new Paragraph({ text: game.category || game.genre || 'N/A' })]
+                        children: [new Paragraph({ text: 'Category', bold: true })],
+                        shading: { fill: '06B6D4' },
+                        width: { size: 20, type: WidthType.PERCENTAGE }
                     }),
                     new TableCell({
-                        children: [new Paragraph({
-                            text: `₹${typeof game.price === 'number' ? game.price.toFixed(2) : parseFloat(game.price || 0).toFixed(2)}`,
-                            alignment: AlignmentType.RIGHT
-                        })]
+                        children: [new Paragraph({ text: 'Price', bold: true, alignment: AlignmentType.RIGHT })],
+                        shading: { fill: '06B6D4' },
+                        width: { size: 15, type: WidthType.PERCENTAGE }
                     }),
                     new TableCell({
-                        children: [new Paragraph({
-                            text: game.rating || '4.5',
-                            alignment: AlignmentType.CENTER
-                        })]
+                        children: [new Paragraph({ text: 'Rating', bold: true, alignment: AlignmentType.CENTER })],
+                        shading: { fill: '06B6D4' },
+                        width: { size: 15, type: WidthType.PERCENTAGE }
                     })
                 ]
-            })
-        )
-    ];
-
-    // Create document
-    const doc = new Document({
-        sections: [{
-            properties: {},
-            children: [
-                // Title
-                new Paragraph({
-                    text: 'My Gaming Wishlist',
-                    heading: HeadingLevel.HEADING_1,
-                    spacing: { after: 200 }
-                }),
-                // Subtitle
-                new Paragraph({
+            }),
+            // Data rows
+            ...wishlist.map((game, index) =>
+                new TableRow({
                     children: [
-                        new TextRun({
-                            text: `Total Games: ${wishlist.length}`,
-                            bold: true
+                        new TableCell({
+                            children: [new Paragraph({ text: String(index + 1), alignment: AlignmentType.CENTER })]
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ text: game.title || 'Unknown Game' })]
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ text: game.category || game.genre || 'N/A' })]
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({
+                                text: `₹${typeof game.price === 'number' ? game.price.toFixed(2) : parseFloat(game.price || 0).toFixed(2)}`,
+                                alignment: AlignmentType.RIGHT
+                            })]
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({
+                                text: game.rating || '4.5',
+                                alignment: AlignmentType.CENTER
+                            })]
                         })
-                    ],
-                    spacing: { after: 100 }
-                }),
-                new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: `Generated: ${new Date().toLocaleDateString()}`,
-                            italics: true,
-                            color: '666666'
-                        })
-                    ],
-                    spacing: { after: 300 }
-                }),
-                // Table
-                new Table({
-                    rows: tableRows,
-                    width: {
-                        size: 100,
-                        type: WidthType.PERCENTAGE
-                    }
-                }),
-                // Footer
-                new Paragraph({
-                    text: '',
-                    spacing: { before: 400 }
-                }),
-                new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: 'GameHatch - Your Gaming Wishlist',
-                            italics: true,
-                            color: '999999',
-                            size: 20
-                        })
-                    ],
-                    alignment: AlignmentType.CENTER
+                    ]
                 })
-            ]
-        }]
-    });
+            )
+        ];
 
-    // Generate and save the document
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, `GameHatch_Wishlist_${new Date().toISOString().split('T')[0]}.docx`);
+        // Create document
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: [
+                    // Title
+                    new Paragraph({
+                        text: 'My Gaming Wishlist',
+                        heading: HeadingLevel.HEADING_1,
+                        spacing: { after: 200 }
+                    }),
+                    // Subtitle
+                    new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: `Total Games: ${wishlist.length}`,
+                                bold: true
+                            })
+                        ],
+                        spacing: { after: 100 }
+                    }),
+                    new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: `Generated: ${new Date().toLocaleDateString()}`,
+                                italics: true,
+                                color: '666666'
+                            })
+                        ],
+                        spacing: { after: 300 }
+                    }),
+                    // Table
+                    new Table({
+                        rows: tableRows,
+                        width: {
+                            size: 100,
+                            type: WidthType.PERCENTAGE
+                        }
+                    }),
+                    // Footer
+                    new Paragraph({
+                        text: '',
+                        spacing: { before: 400 }
+                    }),
+                    new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: 'GameHatch - Your Gaming Wishlist',
+                                italics: true,
+                                color: '999999',
+                                size: 20
+                            })
+                        ],
+                        alignment: AlignmentType.CENTER
+                    })
+                ]
+            }]
+        });
+
+        // Generate and save the document
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `GameHatch_Wishlist_${new Date().toISOString().split('T')[0]}.docx`);
+    } catch (error) {
+        console.error('Error exporting Word document:', error);
+        throw error;
+    }
 };
