@@ -15,13 +15,13 @@ function Footer() {
               alt="GameHatch Logo"
               className="w-10 h-10 rounded-lg shadow-lg hover:scale-105 transition-transform duration-200"
             />
-            
+
             <h3 className="font-bold text-xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
               GameHatch
             </h3>
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
           </div>
-          <p className="mb-4 text-sm text-gray-300">
+          <p className="mb-4 text-sm text-gray-400">
             Your ultimate gaming destination. Discover, play, and conquer the digital realm.
           </p>
           <div className="flex space-x-4">
@@ -45,25 +45,25 @@ function Footer() {
 
         {/* Quick Links */}
         <div>
-          <h3 className="font-bold text-lg mb-4">Quick Links</h3>
+          <h3 className="font-bold text-lg mb-4 text-white">Quick Links</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link to="/games" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/games" className="text-gray-400 hover:text-white transition-colors">
                 All Games
               </Link>
             </li>
             <li>
-              <Link to="/categories" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/categories" className="text-gray-400 hover:text-white transition-colors">
                 Categories
               </Link>
             </li>
             <li>
-              <Link to="/wishlist" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/wishlist" className="text-gray-400 hover:text-white transition-colors">
                 Wishlist
               </Link>
             </li>
             <li>
-              <Link to="/deals" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/deals" className="text-gray-400 hover:text-white transition-colors">
                 Deals
               </Link>
             </li>
@@ -72,25 +72,25 @@ function Footer() {
 
         {/* Support */}
         <div>
-          <h3 className="font-bold text-lg mb-4">Support</h3>
+          <h3 className="font-bold text-lg mb-4 text-white">Support</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link to="/help" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/help" className="text-gray-400 hover:text-white transition-colors">
                 Help Center
               </Link>
             </li>
             <li>
-              <Link to="/contact" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">
                 Contact Us
               </Link>
             </li>
             <li>
-              <Link to="/faq" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/faq" className="text-gray-400 hover:text-white transition-colors">
                 FAQ
               </Link>
             </li>
             <li>
-              <Link to="/terms" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">
                 Terms of Service
               </Link>
             </li>
@@ -99,8 +99,8 @@ function Footer() {
 
         {/* Newsletter */}
         <div>
-          <h3 className="font-bold text-lg mb-4">Stay Updated</h3>
-          <p className="mb-4 text-sm text-gray-300">
+          <h3 className="font-bold text-lg mb-4 text-white">Stay Updated</h3>
+          <p className="mb-4 text-sm text-gray-400">
             Subscribe to get notified about new games and exclusive deals.
           </p>
           <div className="flex items-center bg-gray-800 rounded-md overflow-hidden">
