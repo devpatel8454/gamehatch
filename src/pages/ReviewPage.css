@@ -245,6 +245,30 @@
   display: grid;
   gap: 1.5rem;
   grid-template-columns: 1fr;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+}
+
+/* Custom Scrollbar for Reviews Grid */
+.reviews-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.reviews-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.reviews-grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ffff 0%, #764ba2 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.reviews-grid::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ffff 0%, #ff0096 100%);
 }
 
 .review-card {
