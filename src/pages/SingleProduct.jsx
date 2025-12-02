@@ -81,7 +81,7 @@ function SingleProduct() {
           <span className="text-green-600 text-sm font-medium">In Stock</span>
         </div>
 
-        <p className="text-2xl font-bold">₹{(singleProductDetail?.price).toFixed(2)}</p>
+        <p className="text-2xl font-bold">₹{(singleProductDetail?.price * 83).toFixed(2)}</p>
 
         <p className="text-gray-600">{singleProductDetail?.description}</p>
 

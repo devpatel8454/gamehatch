@@ -132,7 +132,7 @@ function CheckoutPage() {
                 <img src={item.image} alt="Gamepad" className="w-10 h-10" />
                 <span>{item.name}</span>
               </div>
-              <span>₹{(item.quantity * item.price).toFixed(2)}</span>
+              <span>₹{(item.quantity * item.price * 83).toFixed(2)}</span>
             </div>
           );
         })}
@@ -140,7 +140,7 @@ function CheckoutPage() {
         {/* Totals */}
         <div className="flex justify-between border-t pt-2 mt-2 text-sm">
           <span>Subtotal:</span>
-          <span>₹{(totalAmount).toFixed(2)}</span>
+          <span>₹{(totalAmount * 83).toFixed(2)}</span>
         </div>
         <div className="flex justify-between border-b pb-2 mb-2 text-sm">
           <span>Shipping:</span>
@@ -148,7 +148,7 @@ function CheckoutPage() {
         </div>
         <div className="flex justify-between font-bold text-lg mb-4">
           <span>Total:</span>
-          <span>₹{(totalAmount).toFixed(2)}</span>
+          <span>₹{(totalAmount * 83).toFixed(2)}</span>
         </div>
 
         {/* Payment Options */}
