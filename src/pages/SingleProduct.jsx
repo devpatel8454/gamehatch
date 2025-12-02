@@ -30,12 +30,12 @@ function SingleProduct() {
         endpoint: `fakestoreapi.com/products/${id}`,
         tags: [propertyType.GET_SINGLE_PRODUCT_DETAIL],
       });
-    } catch (error) {}
+    } catch (error) { }
   }, [getSingleProductDetail, id]);
 
   const handleAddToCart = () => {
     dispatch(
-      addToCart({ id: singleProductDetail?.id, name: singleProductDetail?.title, price: singleProductDetail?.price, quantity: 1, image:singleProductDetail?.image  })
+      addToCart({ id: singleProductDetail?.id, name: singleProductDetail?.title, price: singleProductDetail?.price, quantity: 1, image: singleProductDetail?.image })
     );
     navigate("/cart");
   };
@@ -81,7 +81,7 @@ function SingleProduct() {
           <span className="text-green-600 text-sm font-medium">In Stock</span>
         </div>
 
-        <p className="text-2xl font-bold">₹{(singleProductDetail?.price * 83).toFixed(2)}</p>
+        <p className="text-2xl font-bold">₹{(singleProductDetail?.price).toFixed(2)}</p>
 
         <p className="text-gray-600">{singleProductDetail?.description}</p>
 
@@ -104,7 +104,7 @@ function SingleProduct() {
             </button>
           ))}
         </div>
-        
+
         <div className="flex items-center gap-4 mt-2">
           {cartItems?.map((e) => e.id).includes(singleProductDetail?.id) ? (
             <div className="flex items-center border rounded">

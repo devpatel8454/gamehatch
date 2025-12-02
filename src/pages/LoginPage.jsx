@@ -21,8 +21,10 @@ const LoginPage = () => {
     },
     validationSchema: Yup.object({
       username: Yup.string()
-        .required('Username is required'),
+        .min(3, 'Username must be at least 3 characters')
+        .required('Username or email is required'),
       password: Yup.string()
+        .min(6, 'Password must be at least 6 characters')
         .required('Password is required')
     }),
     onSubmit: async (values, { setFieldError }) => {
@@ -41,13 +43,13 @@ const LoginPage = () => {
             navigate('/home');
           }
         });
-        
+
         console.log('Login response:', response);
-        
+
         if (!response) {
           throw new Error('No response received from server');
         }
-        
+
         if (response.error) {
           const errorMessage = response.error.message || 'Invalid credentials';
           setFieldError('password', errorMessage);
@@ -70,13 +72,13 @@ const LoginPage = () => {
     <div className="min-h-screen flex flex-col bg-gray-900">
       <main className="flex-grow flex items-center p-0 bg-gray-900">
         {/* Left Side - Gaming Entrance Image */}
-        <div className="hidden md:flex flex-1 h-full min-h-[600px] bg-cover bg-center" 
-             style={{ 
-               backgroundImage: 'url(https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80)'
-             }}>
+        <div className="hidden md:flex flex-1 h-full min-h-[600px] bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80)'
+          }}>
           <div className="w-full h-full bg-gradient-to-r from-black/90 via-black/70 to-transparent flex items-center pl-16">
             <div className="max-w-md">
-              <motion.h2 
+              <motion.h2
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -84,7 +86,7 @@ const LoginPage = () => {
               >
                 Enter the <span className="text-blue-400">Game World</span>
               </motion.h2>
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
@@ -92,7 +94,7 @@ const LoginPage = () => {
               >
                 Your next adventure awaits
               </motion.p>
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
@@ -104,10 +106,10 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Right Side - Login Form */}
         <div className="w-full max-w-md bg-gray-900 p-8 h-screen overflow-y-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -115,7 +117,7 @@ const LoginPage = () => {
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-900 to-blue-900 p-8 text-center border-b border-gray-800">
-              <motion.div 
+              <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
@@ -125,7 +127,7 @@ const LoginPage = () => {
                   <FaGamepad className="text-2xl text-white" />
                 </div>
               </motion.div>
-              <motion.h1 
+              <motion.h1
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -133,7 +135,7 @@ const LoginPage = () => {
               >
                 Welcome Back
               </motion.h1>
-              <motion.p 
+              <motion.p
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -159,11 +161,10 @@ const LoginPage = () => {
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         value={formik.values.username}
-                        className={`w-full px-4 py-2 bg-gray-800 border ${
-                          formik.touched.username && formik.errors.username
+                        className={`w-full px-4 py-2 bg-gray-800 border ${formik.touched.username && formik.errors.username
                             ? 'border-red-500'
                             : 'border-gray-700'
-                        } rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                          } rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
                         placeholder="Enter your username"
                       />
                       {formik.touched.username && formik.errors.username && (
@@ -184,11 +185,10 @@ const LoginPage = () => {
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       value={formik.values.password}
-                      className={`w-full px-4 py-3 bg-gray-700 border ${
-                        formik.touched.password && formik.errors.password
+                      className={`w-full px-4 py-3 bg-gray-700 border ${formik.touched.password && formik.errors.password
                           ? 'border-red-500'
                           : 'border-gray-600 hover:border-gray-500'
-                      } rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all pr-12`}
+                        } rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all pr-12`}
                       placeholder="••••••••"
                       autoComplete="current-password"
                     />
@@ -211,68 +211,67 @@ const LoginPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-colors ${
-                      isLoading ? 'opacity-75 cursor-not-allowed' : ''
-                    }`}
+                    className={`w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-colors ${isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                      }`}
                   >
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </button>
                 </div>
               </form>
-              
-              <motion.div 
+
+              <motion.div
                 className="mt-6 p-5 bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-700/30 rounded-xl backdrop-blur-sm shadow-lg"
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                  <h3 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
-                    <svg className="w-4 h-4 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h.01a1 1 0 100-2H10V9z" clipRule="evenodd" />
-                    </svg>
-                    Demo Account
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm">
-                      <span className="text-blue-200 w-20">Username:</span>
-                      <code className="text-white font-mono bg-blue-900/50 px-3 py-1.5 rounded-lg text-sm flex-1">
-                        mor_2314
-                      </code>
-                      <button 
-                        onClick={() => {
-                          formik.setFieldValue('username', 'mor_2314');
-                          formik.setFieldValue('password', '83r5^_');
-                        }}
-                        className="ml-3 text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-all flex items-center"
-                      >
-                        <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Auto-fill
-                      </button>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="text-blue-200 w-20">Password:</span>
-                      <code className="text-white font-mono bg-blue-900/50 px-3 py-1.5 rounded-lg text-sm flex-1">
-                        83r5^_
-                      </code>
-                    </div>
+                <h3 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
+                  <svg className="w-4 h-4 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h.01a1 1 0 100-2H10V9z" clipRule="evenodd" />
+                  </svg>
+                  Demo Account
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center text-sm">
+                    <span className="text-blue-200 w-20">Username:</span>
+                    <code className="text-white font-mono bg-blue-900/50 px-3 py-1.5 rounded-lg text-sm flex-1">
+                      mor_2314
+                    </code>
+                    <button
+                      onClick={() => {
+                        formik.setFieldValue('username', 'mor_2314');
+                        formik.setFieldValue('password', '83r5^_');
+                      }}
+                      className="ml-3 text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-all flex items-center"
+                    >
+                      <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Auto-fill
+                    </button>
                   </div>
-                </motion.div>
-                
-                <div className="mt-6 text-center px-6">
-                  <p className="text-sm text-gray-400">
-                    Don't have an account?{' '}
-                    <Link to="/signup" className="font-medium text-blue-400 hover:text-blue-300">
-                      Sign up
-                    </Link>
-                  </p>
+                  <div className="flex items-center text-sm">
+                    <span className="text-blue-200 w-20">Password:</span>
+                    <code className="text-white font-mono bg-blue-900/50 px-3 py-1.5 rounded-lg text-sm flex-1">
+                      83r5^_
+                    </code>
+                  </div>
                 </div>
+              </motion.div>
+
+              <div className="mt-6 text-center px-6">
+                <p className="text-sm text-gray-400">
+                  Don't have an account?{' '}
+                  <Link to="/signup" className="font-medium text-blue-400 hover:text-blue-300">
+                    Sign up
+                  </Link>
+                </p>
+              </div>
             </div>
           </motion.div>
         </div>
       </main>
-      
+
       <footer className="w-full bg-gray-900 border-t border-gray-800 py-4">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center">

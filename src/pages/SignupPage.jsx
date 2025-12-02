@@ -7,6 +7,8 @@ import { useAuth } from '../Context/Authcontext';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Footer from '../Components/Footer/Footer';
+import { useGoogleLogin } from '@react-oauth/google';
+import { toast } from 'react-toastify';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -23,10 +25,22 @@ const SignupPage = () => {
       confirmPassword: ''
     },
     validationSchema: Yup.object({
-      username: Yup.string().required('Username is required'),
-      email: Yup.string().email('Invalid email format').required('Email is required'),
+      username: Yup.string()
+        .min(3, 'Username must be at least 3 characters')
+        .max(20, 'Username must not exceed 20 characters')
+        .matches(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
+        .required('Username is required'),
+      email: Yup.string()
+        .email('Please enter a valid email address')
+        .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Invalid email format')
+        .required('Email is required'),
       password: Yup.string()
-        .min(6, 'Password must be at least 6 characters')
+        .min(8, 'Password must be at least 8 characters')
+        .max(50, 'Password must not exceed 50 characters')
+        .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .matches(/[0-9]/, 'Password must contain at least one number')
+        .matches(/[@$!%*?&#]/, 'Password must contain at least one special character (@$!%*?&#)')
         .required('Password is required'),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
@@ -36,9 +50,9 @@ const SignupPage = () => {
       setIsLoading(true);
       try {
         console.log('Attempting to signup with:', values);
-        
+
         let signupSuccess = false;
-        
+
         const response = await signup({
           endpoint: 'localhost:7270/api/Auth/signup',
           payload: {
@@ -53,7 +67,7 @@ const SignupPage = () => {
             navigate('/login');
           }
         });
-        
+
         console.log('SignupPage - Full response object:', JSON.stringify(response, null, 2));
         console.log('SignupPage - response.error:', response?.error);
         console.log('SignupPage - response.data:', response?.data);
@@ -73,7 +87,7 @@ const SignupPage = () => {
         setTimeout(() => {
           navigate('/login');
         }, 100);
-        
+
       } catch (error) {
         console.error('SignupPage - Caught error:', error);
         const errorMessage = error?.message || 'Signup failed. Please try again.';
@@ -84,14 +98,74 @@ const SignupPage = () => {
     }
   });
 
+  // Google Login Handler
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setIsLoading(true);
+        console.log('Google login success:', tokenResponse);
+
+        // Get user info from Google
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`,
+          },
+        });
+
+        const userInfo = await userInfoResponse.json();
+        console.log('Google user info:', userInfo);
+
+        // Send to your backend for registration/login
+        const response = await fetch('https://localhost:7270/api/Auth/google-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: userInfo.email,
+            name: userInfo.name,
+            googleId: userInfo.sub,
+            picture: userInfo.picture,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Backend response:', data);
+
+          // Store token and user data
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user || { email: userInfo.email, name: userInfo.name }));
+          }
+
+          toast.success('✅ Successfully signed in with Google!');
+          navigate('/home');
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Google login failed');
+        }
+      } catch (error) {
+        console.error('Google login error:', error);
+        toast.error(`❌ ${error.message || 'Failed to sign in with Google'}`);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: (error) => {
+      console.error('Google login failed:', error);
+      toast.error('❌ Google login failed. Please try again.');
+    },
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-900">
       <main className="flex-grow flex items-center p-0 bg-gray-900">
         {/* Left Side - Gaming Image */}
-        <div className="hidden md:flex flex-1 h-full min-h-[600px] bg-cover bg-center" 
-             style={{ 
-               backgroundImage: 'url(https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)' 
-             }}>
+        <div className="hidden md:flex flex-1 h-full min-h-[600px] bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)'
+          }}>
           <div className="w-full h-full bg-gradient-to-r from-black/80 to-transparent flex items-center pl-16">
             <div className="max-w-md">
               <h2 className="text-4xl font-bold text-white mb-4">Join the Ultimate Gaming Experience</h2>
@@ -99,10 +173,10 @@ const SignupPage = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Right Side - Signup Form */}
         <div className="w-full max-w-md bg-gray-900 p-8 h-screen overflow-y-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -110,7 +184,7 @@ const SignupPage = () => {
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-900 to-blue-900 p-8 text-center border-b border-gray-800">
-              <motion.div 
+              <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
@@ -120,7 +194,7 @@ const SignupPage = () => {
                   <FaGamepad className="text-2xl text-white" />
                 </div>
               </motion.div>
-              <motion.h1 
+              <motion.h1
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -128,7 +202,7 @@ const SignupPage = () => {
               >
                 Create Your Account
               </motion.h1>
-              <motion.p 
+              <motion.p
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -173,11 +247,10 @@ const SignupPage = () => {
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full px-4 py-3 bg-gray-700 border ${
-                      formik.touched.email && formik.errors.email
-                        ? 'border-red-500'
-                        : 'border-gray-600 hover:border-gray-500'
-                    } rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all`}
+                    className={`w-full px-4 py-3 bg-gray-700 border ${formik.touched.email && formik.errors.email
+                      ? 'border-red-500'
+                      : 'border-gray-600 hover:border-gray-500'
+                      } rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all`}
                     placeholder="Enter your email"
                   />
                   {formik.touched.email && formik.errors.email && (
@@ -244,9 +317,8 @@ const SignupPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-colors ${
-                      isLoading ? 'opacity-75 cursor-not-allowed' : ''
-                    }`}
+                    className={`w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-colors ${isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                      }`}
                   >
                     {isLoading ? 'Creating Account...' : 'Sign Up'}
                   </button>
@@ -263,10 +335,13 @@ const SignupPage = () => {
 
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center py-2.5 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors"
+                  onClick={() => handleGoogleLogin()}
+                  disabled={isLoading}
+                  className={`w-full flex items-center justify-center py-2.5 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors ${isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                    }`}
                 >
                   <FcGoogle className="text-lg mr-2" />
-                  <span>Google</span>
+                  <span>{isLoading ? 'Signing in...' : 'Google'}</span>
                 </button>
 
                 <p className="text-center text-sm text-gray-400 mt-4">
@@ -281,7 +356,7 @@ const SignupPage = () => {
           </motion.div>
         </div>
       </main>
-      
+
       <footer className="w-full bg-gray-900 border-t border-gray-800 py-4 z-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center">

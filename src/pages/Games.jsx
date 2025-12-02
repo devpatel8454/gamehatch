@@ -96,6 +96,7 @@ const Games = () => {
         title: "Cyberpunk 2077",
         category: "RPG",
         price: 59.99,
+        rating: 4.2,
         image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop&crop=center"
       },
       {
@@ -103,6 +104,7 @@ const Games = () => {
         title: "The Witcher 3",
         category: "RPG",
         price: 39.99,
+        rating: 4.9,
         image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center"
       },
       {
@@ -110,6 +112,7 @@ const Games = () => {
         title: "Grand Theft Auto V",
         category: "Action",
         price: 29.99,
+        rating: 4.7,
         image: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&h=300&fit=crop&crop=center"
       },
       {
@@ -117,6 +120,7 @@ const Games = () => {
         title: "Call of Duty: Modern Warfare",
         category: "Action",
         price: 49.99,
+        rating: 4.3,
         image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&h=300&fit=crop&crop=center"
       },
       {
@@ -124,6 +128,7 @@ const Games = () => {
         title: "The Legend of Zelda",
         category: "Adventure",
         price: 59.99,
+        rating: 4.8,
         image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop&crop=center"
       },
       {
@@ -131,6 +136,7 @@ const Games = () => {
         title: "Minecraft",
         category: "Adventure",
         price: 26.95,
+        rating: 4.6,
         image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=300&fit=crop&crop=center"
       },
       {
@@ -138,6 +144,7 @@ const Games = () => {
         title: "FIFA 24",
         category: "Sports",
         price: 69.99,
+        rating: 4.1,
         image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=300&fit=crop&crop=center"
       },
       {
@@ -145,6 +152,7 @@ const Games = () => {
         title: "Need for Speed",
         category: "Racing",
         price: 39.99,
+        rating: 4.4,
         image: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=400&h=300&fit=crop&crop=center"
       }
     ];
@@ -489,7 +497,7 @@ const Games = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2" role="img" aria-label="Rating">
                         <FaStar className="text-yellow-400" aria-hidden="true" />
-                        <span className="text-gray-300 text-sm">4.5</span>
+                        <span className="text-gray-300 text-sm">{game.rating || 4.5}</span>
                       </div>
                       <span className="text-green-400 font-semibold" aria-label="Price">
                         ₹{(game.price || 0).toFixed(2)}
