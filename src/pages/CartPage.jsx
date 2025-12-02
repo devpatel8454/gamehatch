@@ -15,7 +15,7 @@ function CartPage() {
     <div className="w-full p-8">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-6">
-        <a onClick={()=>navigate("/home")}>Home /</a>  <span className="text-black">Cart</span>
+        <a onClick={() => navigate("/home")}>Home /</a>  <span className="text-black">Cart</span>
       </div>
 
       <div className="overflow-hidden border rounded-lg">
@@ -29,32 +29,32 @@ function CartPage() {
         {cartItems?.map((item) => (
           <div key={item.id} className="grid grid-cols-4 items-center p-4 border-t">
             <div className="flex items-center gap-3">
-              <IconButton color="error" size="small" onClick={() => dispatch(removeFromCart({ id: item.id}))}>
+              <IconButton color="error" size="small" onClick={() => dispatch(removeFromCart({ id: item.id }))}>
                 <MdDeleteOutline />
               </IconButton>
               <img src={item.image} alt={item.name} className="w-12 h-12" />
               <span>{item.name}</span>
             </div>
 
-            <div>₹{(item.price * 83).toFixed(2)}</div>
+            <div>₹{(item.price).toFixed(2)}</div>
 
             <div className="flex w-fit items-center border rounded">
-              <IconButton onClick={() => dispatch(decreaseQuantity({ id: item.id}))}>
+              <IconButton onClick={() => dispatch(decreaseQuantity({ id: item.id }))}>
                 <IoMdRemove />
               </IconButton>
               <span className="px-4">{cartItems?.find((e) => e.id === item?.id)?.quantity || 1}</span>
-              <IconButton onClick={() => dispatch(increaseQuantity({ id: item.id}))}>
+              <IconButton onClick={() => dispatch(increaseQuantity({ id: item.id }))}>
                 <IoMdAdd />
               </IconButton>
             </div>
 
-            <div>₹{(item.price * item.quantity * 83).toFixed(2)}</div>
+            <div>₹{(item.price * item.quantity).toFixed(2)}</div>
           </div>
         ))}
       </div>
 
       <div className="flex justify-between items-center mt-6">
-        <Button onClick={()=>navigate("/home")} variant="outlined">Return To Shop</Button>
+        <Button onClick={() => navigate("/home")} variant="outlined">Return To Shop</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
@@ -69,7 +69,7 @@ function CartPage() {
           <h3 className="font-semibold text-lg mb-4">Cart Total</h3>
           <div className="flex justify-between mb-2">
             <span>Subtotal:</span>
-            <span>₹{(subtotal * 83).toFixed(2)}</span>
+            <span>₹{(subtotal).toFixed(2)}</span>
           </div>
           <div className="flex justify-between mb-2">
             <span>Shipping:</span>
@@ -77,9 +77,9 @@ function CartPage() {
           </div>
           <div className="flex justify-between font-bold text-lg mb-4">
             <span>Total:</span>
-            <span>₹{(totalAmount * 83).toFixed(2)}</span>
+            <span>₹{(totalAmount).toFixed(2)}</span>
           </div>
-          <Button onClick={()=>navigate("/checkout")} fullWidth variant="contained" color="error" className="!mt-2">
+          <Button onClick={() => navigate("/checkout")} fullWidth variant="contained" color="error" className="!mt-2">
             Proceed to checkout
           </Button>
         </div>

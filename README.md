@@ -41,7 +41,7 @@
 - ❤️ Save favorite games to wishlist
 - ⭐ Write and read game reviews
 - 📊 View review analytics with interactive charts
-- 📄 Export wishlist to PDF or Word documents
+- 📄 Export wishlist to Word documents
 - 💳 Make secure payments (Stripe integration)
 
 The website features a **futuristic cyberpunk design** with neon colors, smooth animations, and works perfectly on all devices (mobile, tablet, desktop).
@@ -54,7 +54,7 @@ The website features a **futuristic cyberpunk design** with neon colors, smooth 
 - **Browse Games**: View hundreds of games with beautiful cards
 - **Search & Filter**: Find games by name, category, platform, or price
 - **Shopping Cart**: Add games to cart and checkout
-- **Wishlist**: Save your favorite games and export as PDF/Word
+- **Wishlist**: Save your favorite games and export as Word
 - **Reviews**: Rate games and write detailed reviews
 - **Analytics**: See what others think with interactive charts
 - **User Account**: Login, signup, and manage your profile
@@ -426,7 +426,7 @@ GameHatch/
 4. **Add to Wishlist**
    - Click the heart icon on any game card
    - View wishlist by clicking "Wishlist" in navigation
-   - Export your wishlist as PDF or Word document
+   - Export your wishlist as Word document
 
 5. **Write Reviews**
    - Go to a game's detail page

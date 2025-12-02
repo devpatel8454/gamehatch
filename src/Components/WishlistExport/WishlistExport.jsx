@@ -1,28 +1,13 @@
 import React, { useState } from 'react';
-import { FaFilePdf, FaFileWord, FaDownload } from 'react-icons/fa';
+import { FaFileWord, FaDownload } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { exportWishlistToPDF, exportWishlistToWord } from '../../utils/wishlistExport';
+import { exportWishlistToWord } from '../../utils/wishlistExport';
 
 const WishlistExport = ({ wishlist }) => {
     const [isExporting, setIsExporting] = useState(false);
     const [exportFormat, setExportFormat] = useState(null);
 
-    const exportToPDF = async () => {
-        setIsExporting(true);
-        setExportFormat('pdf');
-
-        try {
-            exportWishlistToPDF(wishlist);
-            toast.success('📄 Wishlist exported as PDF successfully!');
-        } catch (error) {
-            toast.error('❌ Failed to export PDF');
-            console.error('PDF export error:', error);
-        } finally {
-            setIsExporting(false);
-            setExportFormat(null);
-        }
-    };
 
     const exportToWord = async () => {
         setIsExporting(true);
@@ -73,51 +58,6 @@ const WishlistExport = ({ wishlist }) => {
 
                 {/* Export Buttons */}
                 <div className="flex flex-wrap gap-4">
-                    {/* PDF Export Button */}
-                    <motion.button
-                        onClick={exportToPDF}
-                        disabled={isExporting || wishlist.length === 0}
-                        className={`
-              group relative px-6 py-3 rounded-lg font-medium transition-all duration-300
-              flex items-center space-x-3 overflow-hidden
-              ${wishlist.length === 0
-                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.6)]'
-                            }
-              ${isExporting && exportFormat === 'pdf' ? 'animate-pulse' : ''}
-            `}
-                        whileHover={wishlist.length > 0 ? { scale: 1.05 } : {}}
-                        whileTap={wishlist.length > 0 ? { scale: 0.95 } : {}}
-                    >
-                        {/* Animated Background */}
-                        {wishlist.length > 0 && (
-                            <motion.div
-                                className="absolute inset-0 bg-gradient-to-r from-red-400/20 to-transparent"
-                                animate={{
-                                    x: ['-100%', '100%'],
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "linear"
-                                }}
-                            />
-                        )}
-
-                        <FaFilePdf className="text-xl relative z-10" />
-                        <span className="relative z-10 font-rajdhani">
-                            {isExporting && exportFormat === 'pdf' ? 'Exporting...' : 'Export as PDF'}
-                        </span>
-
-                        {isExporting && exportFormat === 'pdf' && (
-                            <motion.div
-                                className="w-4 h-4 border-2 border-white border-t-transparent rounded-full relative z-10"
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            />
-                        )}
-                    </motion.button>
-
                     {/* Word Export Button */}
                     <motion.button
                         onClick={exportToWord}
